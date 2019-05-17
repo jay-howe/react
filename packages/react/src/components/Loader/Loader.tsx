@@ -3,7 +3,6 @@ import * as PropTypes from 'prop-types'
 import * as React from 'react'
 
 import {
-  UIComponent,
   createShorthandFactory,
   UIComponentProps,
   commonPropTypes,
@@ -12,8 +11,9 @@ import {
 } from '../../lib'
 import { loaderBehavior } from '../../lib/accessibility'
 import { Accessibility } from '../../lib/accessibility/types'
-import { WithAsProp, ShorthandValue, withSafeTypeForAs } from '../../types'
+import { ShorthandValue, withSafeTypeForAs } from '../../types'
 import Box from '../Box/Box'
+import createComponent from 'src/lib/createComponent'
 
 export type LoaderPosition = 'above' | 'below' | 'start' | 'end'
 
@@ -52,21 +52,16 @@ export interface LoaderProps extends UIComponentProps, ColorComponentProps {
   svg?: ShorthandValue
 }
 
-export interface LoaderState {
-  visible: boolean
+const slotClassNames: LoaderSlotClassNames = {
+  indicator: `ui-loader__indicator`,
+  label: `ui-loader__label`,
+  svg: `ui-loader__svg`,
 }
 
-class Loader extends UIComponent<WithAsProp<LoaderProps>, LoaderState> {
-  static create: Function
-  static displayName = 'Loader'
-  static className = 'ui-loader'
-  static slotClassNames: LoaderSlotClassNames = {
-    indicator: `${Loader.className}__indicator`,
-    label: `${Loader.className}__label`,
-    svg: `${Loader.className}__svg`,
-  }
-
-  static propTypes = {
+const Loader = createComponent<LoaderProps>({
+  className: 'ui-loader',
+  displayName: 'Loader',
+  propTypes: {
     ...commonPropTypes.createCommon({
       children: false,
       content: false,
@@ -79,47 +74,33 @@ class Loader extends UIComponent<WithAsProp<LoaderProps>, LoaderState> {
     labelPosition: PropTypes.oneOf(['above', 'below', 'start', 'end']),
     size: customPropTypes.size,
     svg: customPropTypes.itemShorthand,
-  }
-
-  static defaultProps = {
+  } as any,
+  defaultProps: {
     accessibility: loaderBehavior,
     delay: 0,
     indicator: {},
     labelPosition: 'below',
     svg: '',
     size: 'medium',
-  }
+  },
+  render: ({ ElementType, classes, accessibility, variables, styles, unhandledProps }, props) => {
+    const { delay, indicator, label, svg } = props
 
-  delayTimer: number
+    const delayTimer = React.useRef<number>()
+    const [visible, setVisible] = React.useState<boolean>(delay === 0)
 
-  constructor(props, context) {
-    super(props, context)
+    React.useEffect(() => {
+      if (delay > 0) {
+        delayTimer.current = window.setTimeout(() => {
+          setVisible(true)
+        }, delay)
+      }
 
-    this.state = {
-      visible: this.props.delay === 0,
-    }
-  }
-
-  componentDidMount() {
-    const { delay } = this.props
-
-    if (delay > 0) {
-      this.delayTimer = window.setTimeout(() => {
-        this.setState({ visible: true })
-      }, delay)
-    }
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this.delayTimer)
-  }
-
-  renderComponent({ ElementType, classes, accessibility, variables, styles, unhandledProps }) {
-    const { indicator, label, svg } = this.props
-    const { visible } = this.state
+      return () => clearTimeout(delayTimer.current)
+    }, [])
 
     const svgElement = Box.create(svg, {
-      defaultProps: { className: Loader.slotClassNames.svg, styles: styles.svg },
+      defaultProps: { className: slotClassNames.svg, styles: styles.svg },
     })
 
     return (
@@ -132,20 +113,21 @@ class Loader extends UIComponent<WithAsProp<LoaderProps>, LoaderState> {
           {Box.create(indicator, {
             defaultProps: {
               children: svgElement,
-              className: Loader.slotClassNames.indicator,
+              className: slotClassNames.indicator,
               styles: styles.indicator,
             },
           })}
           {Box.create(label, {
-            defaultProps: { className: Loader.slotClassNames.label, styles: styles.label },
+            defaultProps: { className: slotClassNames.label, styles: styles.label },
           })}
         </ElementType>
       )
     )
-  }
-}
+  },
+})
 
 Loader.create = createShorthandFactory({ Component: Loader })
+;(Loader as any).slotClassNames = slotClassNames
 
 /**
  * A Loader indicates a possible user action.
