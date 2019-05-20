@@ -15,8 +15,6 @@ const createManager = <S, A extends Record<string, Action<S, A>>>(
 
   const manager: Manager<S, A> = {
     actions: {} as A,
-    __EVIL__HYDRATE_STATE: (partial: Partial<S>) => setState(partial),
-
     get state() {
       return getState()
     },

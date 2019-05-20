@@ -14,9 +14,7 @@ export type ManagerConfig<S, A> = {
 
 export type Manager<S, A> = {
   readonly state: S
-
   actions: A
-  __EVIL__HYDRATE_STATE: (partial: Partial<S>) => S
 }
 
 export type ManagerFactory<S, A> = (config: ManagerConfig<S, A>) => Manager<S, A>
