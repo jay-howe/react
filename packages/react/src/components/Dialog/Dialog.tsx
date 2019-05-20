@@ -144,7 +144,7 @@ const Dialog = createComponent<DialogProps>({
     } = props
 
     console.log('render:', props.open)
-    const manager = useStateManager(createDialogManager, { open: props.open })
+    const manager = useStateManager(Dialog, createDialogManager, ['open'], props)
     console.log('manager.state', manager.state.open)
     const contentRef = React.useRef<HTMLElement>()
     const triggerRef = React.useRef<HTMLElement>()

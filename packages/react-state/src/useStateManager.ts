@@ -1,40 +1,55 @@
-import { ManagerFactory } from '@stardust-ui/state'
+import { Manager, ManagerFactory, Middleware } from '@stardust-ui/state'
 import * as React from 'react'
 
-const onlyDefinedProps = <S extends Record<string, any>>(props: S) => {
-  const definedProps: Partial<S> = {}
+import { getDefinedAutoControlledProps, getInitialAutoControlledState } from './stateUtils'
 
-  Object.keys(props).forEach(k => {
-    if (props[k] !== undefined) {
-      definedProps[k] = props[k]
-    }
+const useStateManager = <S, A, P extends Partial<S>, C extends keyof S & string>(
+  component: React.FunctionComponent<P>,
+  createStateManager: ManagerFactory<S, A>,
+  autoControlledProps: C[],
+  props: P,
+): Manager<S, A> => {
+  const definedAutoControlledProps = getDefinedAutoControlledProps(autoControlledProps, props)
+  const autoControlledValues = autoControlledProps.reduce(
+    (values: any[], propName: C) => [...values, props[propName]],
+    [],
+  )
+
+  const overrideAutoControlledProps: Middleware<S, A> = (_prevState: S, nextState: S) => ({
+    ...nextState,
+    ...definedAutoControlledProps,
   })
 
-  return definedProps
-}
-
-const useStateManager = <S, A>(
-  createStateManager: ManagerFactory<S, A>,
-  controlledProps: Partial<S>,
-) => {
   // Heads up! setState() is used only for triggering rerenders stateManager is SSOT()
   const [, setState] = React.useState()
   const syncState = React.useCallback(({ state }) => setState(state), [])
 
-  const manager = React.useRef(
-    // TODO: fix types
+  const latestManager = React.useRef<Manager<S, A> | null>(null)
+  const manager = React.useMemo(() => {
+    console.log('Manager', latestManager)
+    const initialState = latestManager.current
+      ? { ...latestManager.current, ...definedAutoControlledProps }
+      : getInitialAutoControlledState(
+          component,
+          /* TODO: fix types */
+          // @ts-ignore
+          autoControlledProps,
+          props,
+        )
+
     // @ts-ignore
-    createStateManager({
+    return createStateManager({
       debug: true,
       // TODO: defaultOpen prop
-      state: onlyDefinedProps(controlledProps),
+      state: initialState,
+      middleware: [overrideAutoControlledProps],
       sideEffects: [syncState],
-    }),
-  )
+    })
+  }, autoControlledValues)
 
-  manager.current.__EVIL__HYDRATE_STATE(onlyDefinedProps(controlledProps))
+  latestManager.current = manager
 
-  return manager.current
+  return manager
 }
 
 export default useStateManager
