@@ -10,6 +10,8 @@ export * from './themes/types'
 // Components
 //
 
+export { default as AppLayout } from './components/AppLayout/AppLayout'
+
 export { default as Accordion, AccordionProps } from './components/Accordion/Accordion'
 
 export { default as Alert, AlertProps } from './components/Alert/Alert'
@@ -212,6 +214,7 @@ export {
   SizeValue,
 } from './lib'
 export { ShorthandValue, ShorthandRenderer } from './types'
+export { default as BrowserWindow } from './components/AppLayout/BrowserWindow'
 
 //
 // FocusZone

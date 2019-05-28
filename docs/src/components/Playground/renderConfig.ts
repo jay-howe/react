@@ -1,3 +1,4 @@
+import * as faker from 'faker'
 import * as _ from 'lodash'
 import * as React from 'react'
 import * as Stardust from '@stardust-ui/react'
@@ -16,6 +17,7 @@ export const babelConfig = {
 
 export const imports = {
   '@stardust-ui/react': Stardust,
+  faker,
   lodash: _,
   react: React,
   'react-dom': ReactDOM,

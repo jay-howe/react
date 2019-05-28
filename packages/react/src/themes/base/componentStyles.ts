@@ -1,3 +1,5 @@
+export { default as AppLayout } from './components/AppLayout/appLayoutStyles'
+export { default as AppLayoutArea } from './components/AppLayout/appLayoutAreaStyles'
 export { default as Dialog } from './components/Dialog/dialogStyles'
 export { default as Icon } from './components/Icon/iconStyles'
 export { default as Loader } from './components/Loader/loaderStyles'
