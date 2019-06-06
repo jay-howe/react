@@ -145,7 +145,9 @@ class Provider extends React.Component<WithAsProp<ProviderProps>> {
       if (!_.isPlainObject(font)) {
         throw new Error(`fontFaces must be objects, got: ${typeof font}`)
       }
-      this.topLevelFelaRenderer.renderFont(font.name, font.paths, font.style)
+      const properties = { ...font.style, localAlias: font.localAliases }
+
+      this.topLevelFelaRenderer.renderFont(font.name, font.paths, properties)
     }
 
     fontFaces.forEach((font: FontFace) => {
