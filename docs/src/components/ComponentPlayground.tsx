@@ -37,7 +37,9 @@ const ComponentPlayground: React.FunctionComponent<ComponentPlaygroundProps> = p
                   <PlaygroundComponent />
                 </Segment>
               </Flex.Item>
-              <ComponentPlaygroundSnippet component={PlaygroundComponent} />
+              <KnobProvider unstable_skipRegister>
+                <ComponentPlaygroundSnippet component={PlaygroundComponent} />
+              </KnobProvider>
             </Flex>
           </Flex.Item>
 
